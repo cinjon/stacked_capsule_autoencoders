@@ -58,6 +58,8 @@ def pad_and_shift(img, output_size, shift=None, pad_kwargs=None):
     if shift[i] is None:
       shift[i] = output_size[i] - z
 
+  print("PadAndShif: ", output_size, shift)
+
   y_shift, x_shift = shift
   x = tf.random.uniform([], -x_shift, x_shift + 1, dtype=tf.int32)
   y = tf.random.uniform([], -y_shift, y_shift + 1, dtype=tf.int32)
@@ -78,7 +80,9 @@ def pad_and_shift(img, output_size, shift=None, pad_kwargs=None):
   if pad_kwargs is None:
     pad_kwargs = dict()
 
+  print('imgg: ', img)
   img = tf.pad(img, [(y1, y2), (x1, x2), (0, 0)], **pad_kwargs)
+  print(img, x1, x2, y1, y2)
   img.set_shape([height, width, img.shape[-1]])
 
   return img[:height, :width]

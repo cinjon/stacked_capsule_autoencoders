@@ -14,13 +14,18 @@
 # limitations under the License.
 
 """Data config."""
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 import functools
+
 from absl import flags
 from monty.collections import AttrDict
 import tensorflow as tf
-from stacked_capsule_autoencoders.capsules.data import constellation
-from stacked_capsule_autoencoders.capsules.data import image
-from stacked_capsule_autoencoders.capsules.data import preprocess
+from capsules.data import constellation
+from capsules.data import image
+from capsules.data import preprocess
 
 flags.DEFINE_integer('batch_size', 32, 'batch size')
 flags.DEFINE_integer('canvas_size', 28, 'Canvas size.')
@@ -33,6 +38,14 @@ def get(config):
     dataset = make_mnist(config)
   elif config.dataset == 'constellation':
     dataset = make_constellation(config)
+  elif config.dataset == 'moving_mnist':
+    dataset = make_moving_mnist(config)
+  elif config.dataset == 'moving_mnist_first':
+    dataset = make_moving_mnist_first(config)
+  elif config.dataset == 'moving_mnist_rand':
+    dataset = make_moving_mnist_rand(config)
+  elif config.dataset == 'moving_mnist_single_rand':
+    dataset = make_moving_mnist_single_rand(config)
 
   return dataset
 
@@ -79,4 +92,73 @@ def make_constellation(config):
   # data is created online, so there is no point in having
   # a separate dataset for validation
   res = AttrDict(trainset=dataset, validset=dataset)
+  return res
+
+
+def make_moving_mnist(config):
+  """Creates the Moving MNist dataset."""
+
+  def to_float(x):
+    return tf.to_float(x) / 255.
+
+  transform = [to_float]
+
+  batch_size = config.batch_size
+  res = AttrDict(
+      trainset=image.create(
+          'moving_mnist', subset='train', batch_size=batch_size, transforms=transform),
+      validset=image.create(
+          'moving_mnist', subset='val', batch_size=batch_size, transforms=transform))
+
+  return res
+
+
+def make_moving_mnist_first(config):
+  """Creates the Moving MNist dataset."""
+
+  def to_float(x):
+    return tf.to_float(x) / 255.
+  transform = [to_float]
+
+  batch_size = config.batch_size
+  res = AttrDict(
+      trainset=image.create(
+          'moving_mnist_first', subset='train', batch_size=batch_size, transforms=transform),
+      validset=image.create(
+          'moving_mnist_first', subset='val', batch_size=batch_size, transforms=transform))
+
+  return res
+
+
+def make_moving_mnist_rand(config):
+  """Creates the Moving MNist dataset."""
+
+  def to_float(x):
+    return tf.to_float(x) / 255.
+  transform = [to_float]
+
+  batch_size = config.batch_size
+  res = AttrDict(
+      trainset=image.create(
+          'moving_mnist_rand', subset='train', batch_size=batch_size, transforms=transform),
+      validset=image.create(
+          'moving_mnist_rand', subset='val', batch_size=batch_size, transforms=transform))
+
+  return res
+
+
+def make_moving_mnist_single_rand(config):
+  """Creates the Moving MNist dataset."""
+
+  def to_float(x):
+    return tf.to_float(x) / 255.
+  transform = [to_float]
+
+  batch_size = config.batch_size
+  res = AttrDict(
+      trainset=image.create(
+          'moving_mnist_single_rand', subset='train', batch_size=batch_size, transforms=transform),
+      validset=image.create(
+          'moving_mnist_single_rand', subset='val', batch_size=batch_size, transforms=transform))
+
   return res

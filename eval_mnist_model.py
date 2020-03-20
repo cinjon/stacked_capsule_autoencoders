@@ -29,12 +29,12 @@ from monty.collections import AttrDict
 import sklearn.cluster
 import tensorflow as tf
 
-from stacked_capsule_autoencoders.capsules.configs import data_config
-from stacked_capsule_autoencoders.capsules.configs import model_config
-from stacked_capsule_autoencoders.capsules.eval import cluster_classify
-from stacked_capsule_autoencoders.capsules.eval import collect_results
-from stacked_capsule_autoencoders.capsules.plot import make_tsne_plot
-from stacked_capsule_autoencoders.capsules.train import tools
+from capsules.configs import data_config
+from capsules.configs import model_config
+from capsules.eval import cluster_classify
+from capsules.eval import collect_results
+from capsules.plot import make_tsne_plot
+from capsules.train import tools
 
 flags.DEFINE_string('snapshot', '', 'Checkpoint file.')
 flags.DEFINE_string('tsne_figure_name', 'tsne.png', 'Filename for the TSNE '

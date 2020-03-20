@@ -13,14 +13,20 @@
 # limitations under the License.
 
 #!/bin/bash
+# Runs SCAE on 40x40 MNIST where part templates and their mixing probabilisties
+# are learned separately.
 set -e
 set -x
 
-
 # source stacked_capsule_autoencoders/setup_virtualenv.sh
-python -m eval_mnist_model\
-  --snapshot=/misc/kcgscratch1/ChoGroup/resnick/scae/checkpoints/mnist/model.ckpt-300001\
-  --canvas_size=40\
+python -m train\
+  --model=scae\
+  --dataset=moving_mnist_rand\
+  --max_train_steps=300000\
+  --batch_size=128\
+  --lr=3e-5\
+  --use_lr_schedule=True\
+  --canvas_size=64\
   --n_part_caps=40\
   --n_obj_caps=32\
   --colorize_templates=True\
@@ -32,4 +38,5 @@ python -m eval_mnist_model\
   --prior_within_example_sparsity_weight=2.\
   --color_nonlin='sigmoid'\
   --template_nonlin='sigmoid'\
+  --report_loss_steps=250\
   "$@"

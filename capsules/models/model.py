@@ -101,6 +101,7 @@ class Model(snt.AbstractModule):
     del unused_args
     del unused_kwargs
 
+    print('Model - Make Target: ', data)
     res = self.connect(data)
     loss = self._loss(data, res)
 

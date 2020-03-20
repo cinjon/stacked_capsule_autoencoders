@@ -14,17 +14,20 @@
 # limitations under the License.
 
 """Model config for MNIST."""
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from absl import flags
 from monty.collections import AttrDict
 import sonnet as snt
 import tensorflow as tf
-from stacked_capsule_autoencoders.capsules import primary
-from stacked_capsule_autoencoders.capsules.attention import SetTransformer
-from stacked_capsule_autoencoders.capsules.models.constellation import ConstellationAutoencoder
-from stacked_capsule_autoencoders.capsules.models.constellation import ConstellationCapsule
-from stacked_capsule_autoencoders.capsules.models.scae import ImageAutoencoder
-from stacked_capsule_autoencoders.capsules.models.scae import ImageCapsule
+from capsules import primary
+from capsules.attention import SetTransformer
+from capsules.models.constellation import ConstellationAutoencoder
+from capsules.models.constellation import ConstellationCapsule
+from capsules.models.scae import ImageAutoencoder
+from capsules.models.scae import ImageCapsule
 
 flags.DEFINE_float('lr', 1e-4, 'Learning rate.')
 flags.DEFINE_boolean('use_lr_schedule', True, 'Uses learning rate schedule'
@@ -41,7 +44,6 @@ flags.DEFINE_integer('n_channels', 1, 'Number of input channels.')
 flags.DEFINE_integer('n_obj_caps', 10, 'Number of object capsules.')
 flags.DEFINE_integer('n_obj_caps_params', 32, 'Dimensionality of object caps '
                      'feature vector.')
-
 flags.DEFINE_boolean('colorize_templates', False, 'Whether to infer template '
                      'color from input.')
 flags.DEFINE_boolean('use_alpha_channel', False, 'Learns per-pixel mixing '
@@ -162,6 +164,7 @@ def make_scae(config):
       posterior_sparsity_loss_type='entropy',
       posterior_within_example_sparsity_weight=config.posterior_within_example_sparsity_weight,  # pylint:disable=line-too-long
       posterior_between_example_sparsity_weight=config.posterior_between_example_sparsity_weight,  # pylint:disable=line-too-long
+    multi_class='moving_mnist' in config.dataset and 'single' not in config.dataset
       )
 
   return model

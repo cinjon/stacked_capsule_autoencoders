@@ -18,8 +18,8 @@
 set -e
 set -x
 
-source stacked_capsule_autoencoders/setup_virtualenv.sh
-python -m stacked_capsule_autoencoders.train\
+# source stacked_capsule_autoencoders/setup_virtualenv.sh
+python -m train\
   --name=mnist\
   --model=scae\
   --dataset=mnist\

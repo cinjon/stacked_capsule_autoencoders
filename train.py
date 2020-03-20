@@ -30,10 +30,10 @@ from absl import logging
 import numpy as np
 import tensorflow as tf
 
-from stacked_capsule_autoencoders.capsules.configs import data_config
-from stacked_capsule_autoencoders.capsules.configs import model_config
-from stacked_capsule_autoencoders.capsules.train import create_hooks
-from stacked_capsule_autoencoders.capsules.train import tools
+from capsules.configs import data_config
+from capsules.configs import model_config
+from capsules.train import create_hooks
+from capsules.train import tools
 
 
 flags.DEFINE_string('dataset', 'mnist', 'Choose from: {mnist, constellation.}')
@@ -43,7 +43,7 @@ flags.DEFINE_string('model', 'scae', 'Choose from {scae, constellation}.')
 flags.DEFINE_string('name', None, '')
 flags.mark_flag_as_required('name')
 
-flags.DEFINE_string('logdir', 'stacked_capsule_autoencoders/checkpoints/{name}',
+flags.DEFINE_string('logdir', '/misc/kcgscratch1/ChoGroup/resnick/scae/checkpoints/{name}',
                     'Log and checkpoint directory for the experiment.')
 
 flags.DEFINE_float('grad_value_clip', 0., '')
@@ -190,6 +190,7 @@ def main(_=None):
       all_tensors = report_tensors + train_tensors
 
       while train_itr < config.max_train_steps:
+        # print('Doing train itr %d.' % train_itr)
 
         if train_itr % config.report_loss_steps == 0:
           report_vals, valid_report_vals, train_itr, _ = sess.run(all_tensors)

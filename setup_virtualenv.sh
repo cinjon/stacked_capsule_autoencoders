@@ -19,4 +19,4 @@ set -x
 virtualenv -p python3 .
 source ./bin/activate
 
-pip install -r stacked_capsule_autoencoders/requirements.txt
+pip install -r requirements.txt

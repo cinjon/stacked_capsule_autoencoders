@@ -119,6 +119,7 @@ class ImageAutoencoder(Model):
       weight_decay=0.,
       feed_templates=True,
       prep='none',
+      multi_class=False,
   ):
 
     super(ImageAutoencoder, self).__init__()
@@ -150,9 +151,14 @@ class ImageAutoencoder(Model):
     self._feed_templates = feed_templates
 
     self._prep = prep
+    self._multi_class = multi_class
+    print('\n\n***\nMulti Class: ', multi_class, '\n***\n\n')
 
 
   def _img(self, data, prep='none'):
+    # data['image'] --> [128, 40, 40, 1] / float32 for MNist.
+    # data['label'] --> [128] / int64
+    print('Img: ', data)
 
     img = data[self._input_key]
     if prep == 'sobel':
@@ -194,6 +200,7 @@ class ImageAutoencoder(Model):
     # and if that works, concatenate templates to poses
     # this is necessary for set transformer
     n_templates = int(primary_caps.pose.shape[1])
+    print('\n***\nNum Templates: %d\n***\n' % n_templates)
     templates = self._primary_decoder.make_templates(n_templates,
                                                      primary_caps.feature)
 
@@ -235,12 +242,6 @@ class ImageAutoencoder(Model):
       primary_dec_pres = res.winner_pres
     else:
       raise ValueError('Invalid pres_type="{}"".'.format(self._pres_type))
-
-    res.bottom_up_rec = self._primary_decoder(
-        primary_caps.pose,
-        primary_caps.presence,
-        template_feature=primary_caps.feature,
-        img_embedding=primary_caps.img_embedding)
 
     res.top_down_rec = self._primary_decoder(
         res.winner,
@@ -301,15 +302,19 @@ class ImageAutoencoder(Model):
     label = self._label(data)
     if label is not None:
       res.posterior_cls_xe, res.posterior_cls_acc = probe.classification_probe(
-          mass_explained_by_capsule,
-          label,
-          self._n_classes,
-          labeled=data.get('labeled', None))
+        mass_explained_by_capsule,
+        label,
+        self._n_classes,
+        labeled=data.get('labeled', None),
+        multi=self._multi_class
+      )
       res.prior_cls_xe, res.prior_cls_acc = probe.classification_probe(
-          res.caps_presence_prob,
-          label,
-          self._n_classes,
-          labeled=data.get('labeled', None))
+        res.caps_presence_prob,
+        label,
+        self._n_classes,
+        labeled=data.get('labeled', None),
+        multi=self._multi_class
+      )
 
     res.best_cls_acc = tf.maximum(res.prior_cls_acc, res.posterior_cls_acc)
 
@@ -370,7 +375,6 @@ class ImageAutoencoder(Model):
     })
 
     label = self._label(data)
-
 
     return reports
 

@@ -24,18 +24,36 @@ import sonnet as snt
 import tensorflow as tf
 
 
-def classification_probe(features, labels, n_classes, labeled=None):
+def classification_probe(features, labels, n_classes, labeled=None, multi=False):
   """Classification probe with stopped gradient on features."""
 
   def _classification_probe(features):
     logits = snt.Linear(n_classes)(tf.stop_gradient(features))
-    xe = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
-                                                        labels=labels)
+
+    if multi:
+      # Labels is int32 [128, 10]
+      # Logits is [128, 10] float32
+      loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.to_float(labels),
+                                                     logits=logits)
+      # CP is 128,10
+      correct_predictions = tf.equal(
+        tf.cast(tf.round(tf.nn.sigmoid(logits)), tf.int32),
+        tf.round(labels))
+      # ALT is 128
+      all_labels_true = tf.reduce_min(tf.cast(correct_predictions, tf.float32), 1)
+      # ACC is ()
+      acc = tf.reduce_mean(all_labels_true)
+    else:
+      print('Labels: ', labels, ' ... Logits: ', logits)
+      loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
+                                                            labels=labels)
+      acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(logits, axis=1),
+                                                labels)))
+
     if labeled is not None:
-      xe = xe * tf.to_float(labeled)
-    xe = tf.reduce_mean(xe)
-    acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(logits, axis=1),
-                                              labels)))
-    return xe, acc
+      loss = loss * tf.to_float(labeled)
+    loss = tf.reduce_mean(loss)
+
+    return loss, acc
 
   return snt.Module(_classification_probe)(features)
